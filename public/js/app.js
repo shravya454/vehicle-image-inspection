@@ -83,8 +83,8 @@ function renderInspectionResults(img) {
     const lighting = analysis.lighting || {};
     const duplicate = analysis.duplicate || {};
     const photoOfPhoto = analysis.photoOfPhoto || {};
-    const plate = analysis.vehiclePlate || {};
     const dimensions = analysis.dimensions || {};
+    const plate = analysis.vehiclePlate || {};
     const tamper = analysis.tamper || {};
 
     const fileEl = document.getElementById("resultFileName");
@@ -115,15 +115,7 @@ function renderInspectionResults(img) {
     const blurPct = blur.blurPercentage || (blur.isBlurry ? Math.min(100, Math.max(1, Math.round((1 - (blur.laplacianVariance || 0) / 120) * 100))) : 0);
     const lightPct = lighting.lowLightPercentage || (lighting.isLowLight ? Math.min(100, Math.max(1, Math.round(lighting.darkPixelPercentage || ((1 - (lighting.meanBrightness || 0) / 65) * 100)))) : 0);
 
-    const isPlateVisible = !plate.isInvalidPlateFormat && plate.cleanedPlateNumber;
-    const extractedPlate = isPlateVisible ? plate.cleanedPlateNumber : "Not Visible";
-    const plateStatusText = plate.isInvalidPlateFormat
-        ? (plate.cleanedPlateNumber ? `Invalid format (${plate.cleanedPlateNumber})` : "Invalid / not readable")
-        : (plate.cleanedPlateNumber ? `Valid format (${plate.cleanedPlateNumber})` : "Not Visible");
-    const plateEl = document.getElementById("extractedPlateVal");
-    if (plateEl) plateEl.innerText = extractedPlate;
-    const plateStatusEl = document.getElementById("plateFormatStatus");
-    if (plateStatusEl) plateStatusEl.innerText = plateStatusText;
+
 
     const dimensionsStatusEl = document.getElementById("dimensionStatus");
     if (dimensionsStatusEl) {
@@ -162,6 +154,7 @@ function renderInspectionResults(img) {
     const metaColorDepth = document.getElementById("metaColorDepth");
     const metaPixels = document.getElementById("metaPixels");
     const metaDigitalOrigin = document.getElementById("metaDigitalOrigin");
+    const metaPlateNumber = document.getElementById("metaPlateNumber");
 
     if (metaFormat) metaFormat.innerText = String(imgMeta.format || img.mimeType?.split("/")[1] || "JPEG").toUpperCase();
     if (metaSize) {
@@ -180,6 +173,31 @@ function renderInspectionResults(img) {
 
     if (metaDigitalOrigin) {
         metaDigitalOrigin.innerText = imgMeta.digitalOrigin || "Original Camera Capture";
+    }
+
+    if (metaPlateNumber) {
+        if (plate.cleanedPlateNumber) {
+            metaPlateNumber.innerText = plate.cleanedPlateNumber;
+        } else if (plate.rawExtractedText) {
+            metaPlateNumber.innerText = `Invalid Format (${plate.rawExtractedText})`;
+        } else {
+            metaPlateNumber.innerText = "Not Detected";
+        }
+    }
+
+    // Populate Vehicle Plate Number Section Card
+    const displayPlateNumber = document.getElementById("displayPlateNumber");
+    const displayPlateStatus = document.getElementById("displayPlateStatus");
+    const displayPlateType = document.getElementById("displayPlateType");
+
+    if (displayPlateNumber) {
+        displayPlateNumber.innerText = plate.cleanedPlateNumber || plate.rawExtractedText || "Not Detected";
+    }
+    if (displayPlateStatus) {
+        displayPlateStatus.innerText = plate.isValidFormat ? "Valid Registration Format" : (plate.rawExtractedText ? `Invalid Format (${plate.rawExtractedText})` : "Not Detected");
+    }
+    if (displayPlateType) {
+        displayPlateType.innerText = plate.plateType || (plate.isValidFormat ? "Standard Plate" : "N/A");
     }
 
     // Helper to update check item
@@ -274,6 +292,7 @@ function formatTerminalOutputClient(img) {
     const tamper = analysis.tamper || {};
     const dimensions = analysis.dimensions || {};
     const meta = analysis.metadata || {};
+    const plate = analysis.vehiclePlate || {};
 
     const blurPct = blur.blurPercentage || (blur.isBlurry ? Math.min(100, Math.max(1, Math.round((1 - (blur.laplacianVariance || 0) / 120) * 100))) : 0);
     const blurText = blur.isBlurry ? `YES (${blurPct}%)` : "NO";
@@ -299,6 +318,7 @@ function formatTerminalOutputClient(img) {
     const pixelStr = `${totalPixels.toLocaleString()} pixels (${mp} MP)`;
     const colorDepthStr = getColorDepthAndSpace(meta);
     const digitalOriginStr = meta.digitalOrigin || "Original Camera Capture";
+    const plateText = plate.cleanedPlateNumber || (plate.rawExtractedText ? `Invalid Format (${plate.rawExtractedText})` : "Not Detected");
 
     const lines = [
         "================================================================================",
@@ -314,6 +334,11 @@ function formatTerminalOutputClient(img) {
         `  [4] Photo-of-Photo        : ${screenText}`,
         `  [5] Edited / Tampered     : ${tamperText}`,
         "--------------------------------------------------------------------------------",
+        "  💳 VEHICLE PLATE NUMBER:",
+        `  Extracted Plate  : ${plateText}`,
+        `  Format Status    : ${plate.isValidFormat ? "Valid Format" : (plate.rawExtractedText ? "Invalid Format" : "Not Detected")}`,
+        `  Plate Type       : ${plate.plateType || "N/A"}`,
+        "--------------------------------------------------------------------------------",
         "  📐 IMAGE DIMENSIONS:",
         `  Image File       : ${img.originalName || "Unknown"}`,
         `  Width and Height : ${w} × ${h} px`,
@@ -326,6 +351,7 @@ function formatTerminalOutputClient(img) {
         `  Color Depth      : ${colorDepthStr}`,
         `  Pixels           : ${pixelStr}`,
         `  Digital Origin   : ${digitalOriginStr}`,
+        `  Plate Number     : ${plateText}`,
         "================================================================================"
     ];
 
@@ -367,8 +393,6 @@ function runPresetTest(type) {
         w = 1080;
         h = 2400;
         filename = `test_screenshot_iOS_MH12AB1234.png`;
-    } else if (type === "invalid_plate") {
-        filename = `test_invalid_plate_MH99BAD.jpg`;
     }
 
     canvas.width = w;
@@ -413,9 +437,6 @@ function runPresetTest(type) {
     ctx.strokeRect(plateX, plateY, plateW, plateH);
 
     let plateText = "MH12AB1234";
-    if (type === "invalid_plate") {
-        plateText = "MH-BAD-99";
-    }
 
     ctx.fillStyle = "#000000";
     ctx.font = "bold 32px 'JetBrains Mono', monospace";

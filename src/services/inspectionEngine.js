@@ -147,6 +147,7 @@ function generateTerminalReportText(originalName, imageId, report) {
     const tamper = metrics?.tamper || {};
     const dimensions = metrics?.dimensions || {};
     const meta = metrics?.metadata || {};
+    const plate = metrics?.vehiclePlate || {};
 
     // 1. Blur
     const blurPct = blur.blurPercentage || (blur.isBlurry ? Math.min(100, Math.max(1, Math.round((1 - (blur.laplacianVariance || 0) / 120) * 100))) : 0);
@@ -198,6 +199,7 @@ function generateTerminalReportText(originalName, imageId, report) {
     const colorDepthStr = `${depthBit} (${spaceStr})`;
 
     const digitalOriginStr = meta.digitalOrigin || "Original Camera Capture";
+    const plateText = plate.cleanedPlateNumber || (plate.rawExtractedText ? `Invalid Format (${plate.rawExtractedText})` : "Not Detected");
 
     const lines = [
         "\n================================================================================",
@@ -213,6 +215,11 @@ function generateTerminalReportText(originalName, imageId, report) {
         `  [4] Photo-of-Photo        : ${screenText}`,
         `  [5] Edited / Tampered     : ${tamperText}`,
         "--------------------------------------------------------------------------------",
+        "  💳 VEHICLE PLATE NUMBER:",
+        `  Extracted Plate  : ${plateText}`,
+        `  Format Status    : ${plate.isValidFormat ? "Valid Format" : (plate.rawExtractedText ? "Invalid Format" : "Not Detected")}`,
+        `  Plate Type       : ${plate.plateType || "N/A"}`,
+        "--------------------------------------------------------------------------------",
         "  📐 IMAGE DIMENSIONS:",
         `  Image File       : ${originalName}`,
         `  Width and Height : ${w} × ${h} px`,
@@ -225,6 +232,7 @@ function generateTerminalReportText(originalName, imageId, report) {
         `  Color Depth      : ${colorDepthStr}`,
         `  Pixels           : ${pixelStr}`,
         `  Digital Origin   : ${digitalOriginStr}`,
+        `  Plate Number     : ${plateText}`,
         "================================================================================"
     ];
 

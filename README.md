@@ -1,6 +1,6 @@
 # 🚗 Vehicle Image Inspection System
 
-An intelligent, production-grade media processing pipeline that analyzes field-uploaded vehicle photos, evaluates image quality, detects authenticity anomalies, and reports **5-point inspection results** along with detailed image dimensions and metadata analysis before approval — all accessible through a clean web dashboard.
+An intelligent, production-grade media processing pipeline that analyzes field-uploaded vehicle photos, evaluates image quality, detects authenticity anomalies, extracts vehicle license plate numbers, and reports **5-point inspection results** along with detailed vehicle plate recognition, image dimensions, and metadata analysis — all accessible through a clean web dashboard.
 
 🔗 **Live Demo**: [https://vehicle-image-inspection-demo.com](https://vehicle-image-inspection-demo.com) *(Replace with actual link)*
 
@@ -33,8 +33,9 @@ Field agents uploading vehicle photos often encounter environmental or intent-ba
 | 3 | **Duplicate Image** | Exact byte match (SHA-256) & perceptual similarity (dHash/aHash) to prevent re-uploads. |
 | 4 | **Screenshot / Photo-of-Photo** | EXIF, aspect ratio, and Moire pattern detection to ensure original camera captures. |
 | 5 | **Edited / Tampered Image** | EXIF software tags & Error Level Analysis (ELA) to detect manipulated photos. |
-| 6 | **Image Dimensions** | Extraction of resolution, aspect ratio, and layout orientation. |
-| 7 | **Metadata Analysis** | Extraction of file format, size, color depth, and digital origin. |
+| 6 | **Vehicle Plate Recognition** | Tesseract.js OCR + multi-pass bumper crop & Indian registration pattern validation (MH, BH, Defense). |
+| 7 | **Image Dimensions** | Extraction of resolution, aspect ratio, and layout orientation. |
+| 8 | **Metadata Analysis** | Extraction of file format, size, color depth, and digital origin. |
 
 ---
 
@@ -48,6 +49,7 @@ Field agents uploading vehicle photos often encounter environmental or intent-ba
 | **MongoDB Atlas** + **Mongoose** | Cloud database — stores image documents, flags, scores, and inspection metrics |
 | **BullMQ** | Asynchronous job queue for image processing |
 | **Redis** (via **ioredis**) | Queue backend for BullMQ |
+| **Tesseract.js** | Optical Character Recognition (OCR) for license plate text extraction |
 | **Sharp** | High-performance image processing — resizing, pixel-level operations, JPEG re-saving for ELA |
 | **OpenCV.js** (`@techstark/opencv-js`) | Computer vision — Sobel gradients, Moire pattern analysis |
 | **Multer** | Multipart file upload middleware |
@@ -120,6 +122,7 @@ vehicle-image-inspection/
 │   │   ├── duplicateDetectionService.js # Duplicate — SHA-256 + dHash/aHash perceptual hash
 │   │   ├── photoOfPhotoService.js       # Screenshot — EXIF, aspect ratio, Moire grid detection
 │   │   ├── tamperDetectionService.js    # Tamper — EXIF software tags & ELA heatmap generation
+│   │   ├── vehiclePlateService.js       # Vehicle Plate — OCR & registration format validation
 │   │   ├── dimensionService.js          # Image dimension & aspect ratio extraction
 │   │   ├── metadataService.js           # EXIF metadata extraction from image buffer
 │   │   ├── opencvService.js             # OpenCV.js initialization helper
@@ -145,8 +148,9 @@ vehicle-image-inspection/
 ### 1. 🌐 Web Dashboard (Frontend)
 - Single-page inspection dashboard with a **drag-and-drop file upload zone**
 - Displays a **5-point inspection checklist** with pass/fail status per check (Blurry, Low Light, Duplicate, Screenshot, Tampered)
+- Dedicated **Vehicle Plate Number** section showing extracted plate number, format validation status, and registration type.
 - Dedicated **Image Dimensions** table showing resolution, aspect ratio, and layout detection.
-- Dedicated **Metadata Analysis** grid showing file format, size, color depth, and digital origin.
+- Dedicated **Metadata Analysis** grid showing file format, size, color depth, digital origin, and plate number.
 - Shows **overall pass/fail result** with a quality score (0–100)
 - Live terminal-style **output log** showing real-time backend processing steps
 - **Quick-test preset buttons** to instantly test with sample images:
@@ -177,7 +181,7 @@ vehicle-image-inspection/
 | `photoOfPhotoService.js` | EXIF camera tags, screen aspect ratios, Moire pattern FFT | Missing EXIF, 16:9/19.5:9 ratio, Moire grid → screenshot |
 | `tamperDetectionService.js` | EXIF software field scan + ELA resave pixel diff | Photoshop/Canva/GIMP tags, ELA variance spike → tampered |
 
-*Additionally, `dimensionService.js` and `metadataService.js` run alongside these to provide complete structural information about the image.*
+*Additionally, `vehiclePlateService.js`, `dimensionService.js`, and `metadataService.js` run alongside these to extract vehicle plate text and provide complete structural information about the image.*
 
 ### 5. 💾 MongoDB Persistence
 Each upload creates an **Image document** in MongoDB with:
