@@ -2,7 +2,7 @@
 
 An intelligent, production-grade media processing pipeline that analyzes field-uploaded vehicle photos, evaluates image quality, detects authenticity anomalies, extracts vehicle license plate numbers, and reports **5-point inspection results** along with detailed vehicle plate recognition, image dimensions, and metadata analysis — all accessible through a clean web dashboard.
 
-🔗 **Live Demo**: [https://vehicle-image-inspection-demo.com](https://vehicle-image-inspection-demo.com) *(Replace with actual link)*
+🔗 **Live Demo**: https://vehicle-image-inspection.onrender.com
 
 ---
 
