@@ -35,6 +35,8 @@ async function uploadFile(file) {
     const formData = new FormData();
     formData.append("image", file);
 
+    showProcessingState();
+
     try {
         const res = await fetch("/api/upload", {
             method: "POST",
@@ -53,7 +55,21 @@ async function uploadFile(file) {
     }
 }
 
-async function fetchLatestReport(imageId, retries = 40) {
+function showProcessingState() {
+    const placeholderEl = document.getElementById("emptyPlaceholder");
+    if (placeholderEl) {
+        placeholderEl.classList.remove("hidden");
+        placeholderEl.innerHTML = `
+            <i class="fa-solid fa-spinner fa-spin placeholder-icon" style="color:#3b82f6;"></i>
+            <h3>Processing Vehicle Inspection...</h3>
+            <p style="color:#60a5fa; font-weight:600; font-size:1rem; margin-top:0.5rem;"><i class="fa-solid fa-clock"></i> The result will be processed — please wait 1 to 2 minutes.</p>
+        `;
+    }
+    const resultContent = document.getElementById("resultContent");
+    if (resultContent) resultContent.classList.add("hidden");
+}
+
+async function fetchLatestReport(imageId, retries = 120) {
     try {
         const res = await fetch(`/api/images/${imageId}`);
         const data = await res.json();
@@ -61,6 +77,7 @@ async function fetchLatestReport(imageId, retries = 40) {
         if (data.success && data.image) {
             const status = data.image.status;
             if ((status === "pending" || status === "processing") && retries > 0) {
+                showProcessingState();
                 setTimeout(() => fetchLatestReport(imageId, retries - 1), 1000);
             } else {
                 renderInspectionResults(data.image);

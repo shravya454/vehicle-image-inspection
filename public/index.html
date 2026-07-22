@@ -39,7 +39,11 @@
         <section class="simple-card">
             <div class="card-title">
                 <h2><i class="fa-solid fa-upload"></i> Upload Vehicle Photo</h2>
-                <p>Select a vehicle photo or click a test scenario button below to see immediate 5-point inspection, vehicle plate number, image dimensions, and metadata results.</p>
+                <p>Select a vehicle photo or click a test scenario button below to see 5-point inspection, vehicle plate number, image dimensions, and metadata results.</p>
+                <div class="processing-notice-banner" style="background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.35); border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1.25rem; font-size: 0.9rem; color: #60a5fa; display: flex; align-items: center; gap: 0.6rem; font-weight: 500;">
+                    <i class="fa-solid fa-clock" style="font-size: 1.1rem; color: #3b82f6;"></i>
+                    <span><strong>Processing Note:</strong> Results will be processed — please wait 1 to 2 minutes.</span>
+                </div>
             </div>
 
             <div class="simple-dropzone" id="dropZone">
@@ -74,6 +78,7 @@
                 <i class="fa-solid fa-image-portrait placeholder-icon"></i>
                 <h3>No Image Inspected Yet</h3>
                 <p>Upload a vehicle image or click a test preset button above to see the report.</p>
+                <p style="margin-top: 0.5rem; font-size: 0.85rem; color: #60a5fa;"><i class="fa-solid fa-info-circle"></i> Results will be processed — please wait 1 to 2 minutes once submitted.</p>
             </div>
 
             <!-- Result Content Container -->
