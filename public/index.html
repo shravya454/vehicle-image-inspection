@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Image Inspection System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="simple-theme">
+
+    <!-- Simple Top Navigation -->
+    <header class="simple-header">
+        <div class="header-content">
+            <div class="brand">
+                <i class="fa-solid fa-car-shield brand-icon"></i>
+                <div>
+                    <h1>Vehicle Image Inspector</h1>
+                    <p>6-Point Quality & Authenticity Detection System</p>
+                </div>
+            </div>
+            <div class="terminal-note">
+                <i class="fa-solid fa-terminal"></i> Terminal & Frontend Output Active
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Simple App Layout -->
+    <main class="simple-container">
+
+        <!-- 1. Upload Card -->
+        <section class="simple-card">
+            <div class="card-title">
+                <h2><i class="fa-solid fa-upload"></i> Upload Vehicle Photo</h2>
+                <p>Select a vehicle photo or click a test scenario button below to see immediate 6-point inspection
+                    results.</p>
+            </div>
+
+            <div class="simple-dropzone" id="dropZone">
+                <input type="file" id="fileInput" accept="image/jpeg,image/png,image/jpg" class="hidden-input">
+                <i class="fa-solid fa-cloud-arrow-up drop-icon"></i>
+                <h3>Click to Upload or Drag & Drop Image</h3>
+                <p>Supports JPG, JPEG, PNG</p>
+            </div>
+
+            <!-- Quick Test Scenarios -->
+            <div class="quick-scenarios">
+                <span class="scenarios-label"><i class="fa-solid fa-vial"></i> Quick Test Preset Images:</span>
+                <div class="scenario-buttons">
+                    <button class="btn btn-preset" onclick="runPresetTest('clean')">✅ Clean Image</button>
+                    <button class="btn btn-preset" onclick="runPresetTest('blurry')">📷 Blurry Image</button>
+                    <button class="btn btn-preset" onclick="runPresetTest('low_light')">🌙 Low Light</button>
+                    <button class="btn btn-preset" onclick="runPresetTest('screenshot')">📱 Screenshot</button>
+                    <button class="btn btn-preset" onclick="runPresetTest('tampered')">✨ Tampered</button>
+                    <button class="btn btn-preset" onclick="runPresetTest('invalid_plate')">💳 Invalid Plate</button>
+                    <button class="btn btn-preset" onclick="runPresetTest('duplicate')">🔄 Duplicate Image</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. Latest Inspection Result Section -->
+        <section class="simple-card" id="resultsSection">
+            <div class="card-title">
+                <h2><i class="fa-solid fa-square-poll-vertical"></i> Inspection Results & Issue Breakdown</h2>
+            </div>
+
+            <!-- Empty Placeholder state when no image uploaded yet -->
+            <div class="empty-placeholder" id="emptyPlaceholder">
+                <i class="fa-solid fa-image-portrait placeholder-icon"></i>
+                <h3>No Image Inspected Yet</h3>
+                <p>Upload a vehicle image or click a test preset button above to see the report.</p>
+            </div>
+
+            <!-- Result Content Container -->
+            <div class="result-content hidden" id="resultContent">
+
+                <!-- Image Previews Container (Original) -->
+                <div class="image-previews-container">
+                    <!-- Uploaded Vehicle Image Preview Card -->
+                    <div class="image-preview-card" id="imagePreviewCard">
+                        <div class="image-preview-header">
+                            <h4><i class="fa-solid fa-image"></i> Inspected Vehicle Image</h4>
+                        </div>
+                        <div class="image-preview-body">
+                            <img id="inspectedImageDisplay" src="" alt="Uploaded Vehicle Photo"
+                                class="preview-img-element" />
+                        </div>
+                    </div>
+
+
+                </div>
+
+                <!-- Inspection Checklist Table -->
+                <div class="checklist-grid">
+                    <h3><i class="fa-solid fa-list-check"></i> Inspection Problem Statement Checklist:</h3>
+
+                    <div class="check-item" id="checkBlur">
+                        <div class="item-left">
+                            <span class="check-icon" id="iconBlur">✅</span>
+                            <div>
+                                <strong>1. Blurry Image</strong>
+                                <p id="descBlur">Image is sharp and clear</p>
+                            </div>
+                        </div>
+                        <span class="check-tag" id="tagBlur">PASSED</span>
+                    </div>
+
+                    <div class="check-item" id="checkLight">
+                        <div class="item-left">
+                            <span class="check-icon" id="iconLight">✅</span>
+                            <div>
+                                <strong>2. Low Light</strong>
+                                <p id="descLight">Good lighting conditions</p>
+                            </div>
+                        </div>
+                        <span class="check-tag" id="tagLight">PASSED</span>
+                    </div>
+
+                    <div class="check-item" id="checkDup">
+                        <div class="item-left">
+                            <span class="check-icon" id="iconDup">✅</span>
+                            <div>
+                                <strong>3. Duplicate Image</strong>
+                                <p id="descDup">Unique new image upload</p>
+                            </div>
+                        </div>
+                        <span class="check-tag" id="tagDup">PASSED</span>
+                    </div>
+
+                    <div class="check-item" id="checkScreen">
+                        <div class="item-left">
+                            <span class="check-icon" id="iconScreen">✅</span>
+                            <div>
+                                <strong>4. Photo-of-Photo</strong>
+                                <p id="descScreen">Original camera photo</p>
+                            </div>
+                        </div>
+                        <span class="check-tag" id="tagScreen">PASSED</span>
+                    </div>
+
+                    <div class="check-item" id="checkTamper">
+                        <div class="item-left">
+                            <span class="check-icon" id="iconTamper">✅</span>
+                            <div>
+                                <strong>5. Edited / Tampered Image</strong>
+                                <p id="descTamper">Original unmodified photo</p>
+                            </div>
+                        </div>
+                        <span class="check-tag" id="tagTamper">PASSED</span>
+                    </div>
+                </div>
+
+                <!-- 1. Image Dimensions Section -->
+                <div class="analysis-section-card" id="dimensionSectionCard">
+                    <h3><i class="fa-solid fa-ruler-combined"></i> Image Dimensions</h3>
+
+                    <div class="table-container">
+                        <table class="dimension-table">
+                            <thead>
+                                <tr>
+                                    <th>Image File</th>
+                                    <th>Width & Height (Pixels)</th>
+                                    <th>Aspect Ratio</th>
+                                    <th>Layout Detection</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="table-file-info">
+                                            <img id="tableThumb" src="" alt="Thumbnail" class="table-thumb" />
+                                            <span id="tableFileName">-</span>
+                                        </div>
+                                    </td>
+                                    <td id="dimResolution">-</td>
+                                    <td id="dimAspectRatio">-</td>
+                                    <td id="dimLayout">-</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 2. Metadata Analysis Section -->
+                <div class="analysis-section-card" id="metadataSectionCard">
+                    <h3><i class="fa-solid fa-circle-info"></i> Metadata Analysis</h3>
+
+                    <div class="metadata-grid" id="metadataGrid">
+                        <div class="metadata-item">
+                            <span class="meta-label">File Format</span>
+                            <span class="meta-val" id="metaFormat">-</span>
+                        </div>
+                        <div class="metadata-item">
+                            <span class="meta-label">File Size</span>
+                            <span class="meta-val" id="metaSize">-</span>
+                        </div>
+                        <div class="metadata-item">
+                            <span class="meta-label">Color Depth & Space</span>
+                            <span class="meta-val" id="metaColorDepth">-</span>
+                        </div>
+                        <div class="metadata-item">
+                            <span class="meta-label">Pixels</span>
+                            <span class="meta-val" id="metaPixels">-</span>
+                        </div>
+                        <div class="metadata-item">
+                            <span class="meta-label">Digital Origin</span>
+                            <span class="meta-val" id="metaDigitalOrigin">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Inspection Terminal Console Output Section -->
+                <div class="terminal-card" id="terminalCard">
+                    <div class="terminal-header">
+                        <div class="terminal-header-left">
+                            <div class="terminal-dots">
+                                <span class="dot red"></span>
+                                <span class="dot yellow"></span>
+                                <span class="dot green"></span>
+                            </div>
+                            <span class="terminal-title"><i class="fa-solid fa-terminal"></i> Terminal & Frontend Output
+                                Log</span>
+                        </div>
+                        <button class="btn-copy-terminal" id="copyTerminalBtn" onclick="copyTerminalOutput()">
+                            <i class="fa-regular fa-copy"></i> Copy Terminal Output
+                        </button>
+                    </div>
+                    <pre class="terminal-body" id="terminalOutputText">Waiting for vehicle inspection...</pre>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <script src="js/app.js"></script>
+</body>
+
+</html>
